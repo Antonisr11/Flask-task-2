@@ -376,49 +376,6 @@ def update_product():
     else:
         return Response("This action requires admin rights", mimetype='application/json', status=400)
 
-"""
-@app.route('/test/<int:where>')
-def test(where):
-    import requests
-    def get_valid_userUuid():
-        return requests.post('http://127.0.0.1:5000/login', data="{\"email\": \"admin@test.gr\", \"password\": \"0\" }").text[10:-21]
-    def clear_all():
-        global users_sessions
-        users.drop()
-        products.drop()
-        users_sessions = {}
-        return Response("Cleared users, products and users_sessions!")
-
-    print("Welcome to test: ",where)
-
-    if where == 1:
-        return Response(requests.post('http://127.0.0.1:5000/createUser', data="{\"username\": \"ant\", \"password\": \"0\", \"email\":\"admin@test.gr\" }"))
-    elif where == 2:
-        return Response(requests.post('http://127.0.0.1:5000/login', data="{\"email\": \"admin@test.gr\", \"password\": \"0\" }"))
-    elif where == 3:
-        return Response(requests.get('http://127.0.0.1:5000/addTo_cart',
-                                     data="{\"id\":\"60c9bc0d42de83be95881632\",\"quantity\":3}",
-                      headers=json.loads("{\"authorization\":\"" + get_valid_userUuid() + "\"}")))
-    elif where == 4:
-        return Response(requests.get('http://127.0.0.1:5000/show_cart', headers=json.loads("{\"authorization\":\"" + get_valid_userUuid() + "\"}")))
-    elif where == 5:
-         return Response(requests.get('http://127.0.0.1:5000/deleteItem_cart', data="{\"id\":\"60c9bc0d42de83be95881632\"}", headers=json.loads("{\"authorization\":\"" + get_valid_userUuid() + "\"}")))
-    elif where == 6:
-         return Response(requests.get('http://127.0.0.1:5000/buyProducts_cart', data="{\"card_number\":\"1234567891234500\"}", headers=json.loads("{\"authorization\":\"" + get_valid_userUuid() + "\"}")))
-    elif where == 7:
-         return Response(requests.get('http://127.0.0.1:5000/show_history', headers=json.loads("{\"authorization\":\"" + get_valid_userUuid() + "\"}")))
-    elif where == 8:
-         return Response(requests.get('http://127.0.0.1:5000/delete_user', headers=json.loads("{\"authorization\":\"" + get_valid_userUuid() + "\"}")))
-    elif where == 9:
-         return Response(requests.get('http://127.0.0.1:5000/delete_product', data="{\"id\":\"60c9bc0d42de83be95881632\"}", headers=json.loads("{\"authorization\":\"" + get_valid_userUuid() + "\"}")))
-    elif where == 10:
-         return Response(requests.get('http://127.0.0.1:5000/update_product', data="{\"id\":\"60c9bc7472c411f964fc8871\",\"name\":\"poniros\",\"price\":500,\"description\":\"o giorgos einai poniros\", \"stock\":0}", headers=json.loads("{\"authorization\":\"" + get_valid_userUuid() + "\"}")))
-    elif where == 2873:
-        return clear_all()
-
-    return Response("Emmm ok..?")
-"""
-
 if __name__ == '__main__':
     # Εκτέλεση flask service σε debug mode, στην port 5000.
     app.run(debug=True, host='0.0.0.0', port=5000)
