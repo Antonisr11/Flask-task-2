@@ -224,7 +224,6 @@ def deleteItem_cart():
             for i in range(1, cart_items + 1):
                 if 'product_'+str(i) in cart_products:
                     new_cart_items += 1
-                    print("5: ",type(cart_products['product_'+str(i)]))
                     new_cart_products += "\"product_" + str(new_cart_items) + "\" : \"" + cart_products['product_'+str(i)] + "\","
             cart_products = new_cart_products
             cart_items = new_cart_items
@@ -241,15 +240,15 @@ def buyProducts_cart():
         return Response("This request needs JSON data", status=500, mimetype='application/json')
     if not has_required_fields(("card_number",), data):
         return Response("There is missing at least one field in your request", status=500, mimetype="application/json")
-    if not len(data["card_number"]) == 16:
-        return Response("Card number has to be 16-numbers long", mimetype='application/json', status=400)
+    if not len(data["card_number"]) == 16 or not (str(data["card_number"]).isnumeric()):
+        return Response("Card number has to be number and 16-numbers long", mimetype='application/json', status=400)
 
     if is_session_valid(request.headers['authorization'], "Simple"):
-        global cart_products, cart_total_price, cart_items,users_sessions
-        receipt = cart_products[:-1] + ", \"total_price\":" + str(cart_total_price) + "},"
+        global cart_products, cart_total_price, cart_items, users_sessions
+        receipt = "Receipt - "+time.asctime( time.localtime(time.time()))+". Total Items: "+str(cart_items)+". Total Price: "+str(cart_total_price)+". Cart Number: ************"+str(data["card_number"])[-4:]+". Thank you for your purchase!"
         for session in users_sessions:
             if session[0] == request.headers['authorization']:
-                users.find_one_and_update({"email" : session[1]},{"$set":{"orderHistory" : users.find_one({"email" : session[1]})["orderHistory"]+ receipt}})
+                users.find_one_and_update({"email" : session[1]},{"$set":{"orderHistory" : users.find_one({"email" : session[1]})["orderHistory"]+ json.dumps(cart_products[:-1] + ", \"total_price\":" + str(cart_total_price) + "}")}})
                 # Εφόσον έγινε η αγορά το καλάθι αδειάζει
                 cart_products="{"
                 cart_total_price=0
@@ -355,49 +354,6 @@ def update_product():
             return Response("Successful product update", mimetype='application/json', status=200)
     else:
         return Response("This action requires admin rights", mimetype='application/json', status=400)
-
-"""
-@app.route('/test/<int:where>')
-def test(where):
-    import requests
-    def get_valid_userUuid():
-        return requests.post('http://127.0.0.1:5000/login', data="{\"email\": \"admin@test.gr\", \"password\": \"0\" }").text[10:-21]
-    def clear_all():
-        global users_sessions
-        users.drop()
-        products.drop()
-        users_sessions = {}
-        return Response("Cleared users, products and users_sessions!")
-
-    print("Welcome to test: ",where)
-
-    if where == 1:
-        return Response(requests.post('http://127.0.0.1:5000/createUser', data="{\"username\": \"ant\", \"password\": \"0\", \"email\":\"admin@test.gr\" }"))
-    elif where == 2:
-        return Response(requests.post('http://127.0.0.1:5000/login', data="{\"email\": \"admin@test.gr\", \"password\": \"0\" }"))
-    elif where == 3:
-        return Response(requests.get('http://127.0.0.1:5000/addTo_cart',
-                                     data="{\"id\":\"60c9bc0d42de83be95881632\",\"quantity\":3}",
-                      headers=json.loads("{\"authorization\":\"" + get_valid_userUuid() + "\"}")))
-    elif where == 4:
-        return Response(requests.get('http://127.0.0.1:5000/show_cart', headers=json.loads("{\"authorization\":\"" + get_valid_userUuid() + "\"}")))
-    elif where == 5:
-         return Response(requests.get('http://127.0.0.1:5000/deleteItem_cart', data="{\"id\":\"60c9bc0d42de83be95881632\"}", headers=json.loads("{\"authorization\":\"" + get_valid_userUuid() + "\"}")))
-    elif where == 6:
-         return Response(requests.get('http://127.0.0.1:5000/buyProducts_cart', data="{\"card_number\":\"1234567891234500\"}", headers=json.loads("{\"authorization\":\"" + get_valid_userUuid() + "\"}")))
-    elif where == 7:
-         return Response(requests.get('http://127.0.0.1:5000/show_history', headers=json.loads("{\"authorization\":\"" + get_valid_userUuid() + "\"}")))
-    elif where == 8:
-         return Response(requests.get('http://127.0.0.1:5000/delete_user', headers=json.loads("{\"authorization\":\"" + get_valid_userUuid() + "\"}")))
-    elif where == 9:
-         return Response(requests.get('http://127.0.0.1:5000/delete_product', data="{\"id\":\"60c9bc0d42de83be95881632\"}", headers=json.loads("{\"authorization\":\"" + get_valid_userUuid() + "\"}")))
-    elif where == 10:
-         return Response(requests.get('http://127.0.0.1:5000/update_product', data="{\"id\":\"60c9bc7472c411f964fc8871\",\"name\":\"poniros\",\"price\":500,\"description\":\"o giorgos einai poniros\", \"stock\":0}", headers=json.loads("{\"authorization\":\"" + get_valid_userUuid() + "\"}")))
-    elif where == 2873:
-        return clear_all()
-
-    return Response("Emmm ok..?")
-"""
 
 if __name__ == '__main__':
     # Εκτέλεση flask service σε debug mode, στην port 5000.
